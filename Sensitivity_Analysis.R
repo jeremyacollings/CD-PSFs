@@ -4,7 +4,8 @@ library(ggplot2)
 library(brms)
 
 set.seed(19)
-
+#set.seed(20)
+#set.seed(21)
 # setting the range for the parameter distributions
 
 c_min <- -2
@@ -31,7 +32,7 @@ NDs <- c()
 FIs <- c()
 
 # generating data from 5000 runs
-runs <- 5000
+runs <- 100000
 for(i in 1:runs){
   cAAs[i] <- runif(1, min = c_min, max = c_max)
   cBAs[i] <- runif(1, min = c_min, max = c_max)
@@ -49,13 +50,15 @@ for(i in 1:runs){
   alphaBBs[i] <- cBBs[i]+sigBs[i]*phiBs[i]
   alphaABs[i] <- cABs[i]+sigAs[i]*phiBs[i]
   
-  NDs[i] <- 1 - sqrt((alphaABs[i]*alphaBAs[i])/(alphaAAs[i]*alphaBBs[i]))
-  FIs[i] <- sqrt((alphaAAs[i]*alphaABs[i])/(alphaBBs[i]*alphaBAs[i]))
+  NDs[i] <- ifelse(alphaABs[i] < 0 & alphaBAs[i] < 0 & alphaAAs[i] < 0 & alphaBBs[i] < 0,
+                   1 - sqrt((alphaABs[i]*alphaBAs[i])/(alphaAAs[i]*alphaBBs[i])), NA)
+  FIs[i] <- ifelse(alphaABs[i] < 0 & alphaBAs[i] < 0 & alphaAAs[i] < 0 & alphaBBs[i] < 0, ifelse(sqrt((alphaAAs[i]*alphaABs[i])/(alphaBBs[i]*alphaBAs[i])) > sqrt((alphaBBs[i]*alphaBAs[i])/(alphaAAs[i]*alphaABs[i])),
+                   sqrt((alphaAAs[i]*alphaABs[i])/(alphaBBs[i]*alphaBAs[i])), sqrt((alphaBBs[i]*alphaBAs[i])/(alphaAAs[i]*alphaABs[i]))), NA)
   
 }
 
-dat <- cbind.data.frame(cAA = scale(cAAs), cBA = scale(cBAs), 
-                        cBB = scale(cBBs), cAB = scale(cABs),
+dat <- cbind.data.frame(cAA = scale(abs(cAAs)), cBA = scale(abs(cBAs)), 
+                        cBB = scale(abs(cBBs)), cAB = scale(abs(cABs)),
                         sigA = scale(sigAs), sigB = scale(sigBs), 
                         phiA = scale(phiAs), phiB = scale(phiBs), 
                         alphaAA = alphaAAs, alphaBA = alphaBAs, 
@@ -66,9 +69,9 @@ dat <- cbind.data.frame(cAA = scale(cAAs), cBA = scale(cBAs),
 dat$coexist <- ifelse(dat$FI > -dat$ND + 1 & dat$FI < 1/(-dat$ND+1), 1, 0)
 
 # running some models
-fit.FI <- brm(FI ~ abs(cAA) + abs(cBA) + abs(cBB) + abs(cAB) + sigA + sigB + phiA + phiB, data = dat, cores = 4)
-fit.ND <- brm(ND ~ abs(cAA) + abs(cBA) + abs(cBB) + abs(cAB) + sigA + sigB + phiA + phiB, data = dat, cores = 4)
-fit.coexist <- brm(coexist ~ abs(cAA) + abs(cBA) + abs(cBB) + abs(cAB) + sigA + sigB + phiA + phiB, data = dat, 
+fit.FI <- brm(abs(FI-1) ~  cAA + cBA + cBB + cAB + sigA + sigB + phiA + phiB, data = dat, cores = 4)
+fit.ND <- brm(ND ~ cAA + cBA + cBB + cAB + sigA + sigB + phiA + phiB, data = dat, cores = 4)
+fit.coexist <- brm(coexist ~ cAA + cBA + cBB + cAB + sigA + sigB + phiA + phiB, data = dat, 
                    family = bernoulli, cores = 4)
 
 # extracting coefficients and CIs
@@ -99,4 +102,13 @@ ggplot(data = dat2[which(dat2$par != "Intercept"),], aes(x = par, y = estimate, 
   xlab("Parameter") + ylab("Effect Size") + 
   geom_errorbar(position = position_dodge(width = .9), width = .25)
 
+ggplot(dat[1:500,], aes(x = cAA, y = ND)) + geom_point(alpha = .7) +
+  geom_smooth(method = "lm") + ylim(-5, 5)
+ggplot(dat[1:500,], aes(x = cAB, y = ND)) + geom_point(alpha = .7) +
+  geom_smooth(method = "lm") + ylim(-5, 5)
+
+ggplot(dat[1:500,], aes(x = cAA, y = abs(FI-1))) + geom_point(alpha = .7) +
+  geom_smooth(method = "lm") + ylim(-5, 5)
+ggplot(dat[1:500,], aes(x = cAB, y = abs(FI-1))) + geom_point(alpha = .7) +
+  geom_smooth(method = "lm") + ylim(-5, 5)
 
