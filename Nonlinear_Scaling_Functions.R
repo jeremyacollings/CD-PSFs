@@ -17,8 +17,9 @@ coexist_plot <- function(d, sterile = FALSE){
   p <- ggplot(d, aes(x = niche, y = fit, color = v)) + 
     geom_point(size = 2) + geom_abline(slope = -1, intercept = 1) + 
     theme_classic(base_size = 12) + stat_function(fun=f) + xlim(-1, 1) + ylim(0, 2) + 
-    xlab("Niche Difference") + ylab("Fitness Inequality") +
-    scale_color_gradient(low = "#E8CCF5", high = "#260A33")
+    xlab("Niche Difference") + ylab("Fitness Ratio") +
+    scale_color_gradient(low = "#F5D544", high = "#844A9D") + 
+    theme(legend.position = "none")
   if(sterile == TRUE) p + geom_point(aes(x = nicheS, y = fitS), color = "#2F242C") else p
 }
 
@@ -36,224 +37,6 @@ coexist_plot <- function(d, sterile = FALSE){
 # y = ax^2 + bx + c
 # vertex = (-b/(2a), (4ac - b^2)/(4a))
 # focal length = 1/(4a)
-
-# Panel A: Linear Scaling of Phi
-
-# phi = .2 + v
-
-Caa <- rep(-.5, 201)
-Cbb <- rep(-.8, 201)
-Cba <- rep(-.8, 201)
-Cab <- rep(-.5, 201)
-
-s <- rep(-.2, 201)
-p <- rep(.2, 201)
-
-v <- seq(-10, 10, .1)
-
-dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
-
-dat$p.scaled <- dat$p + dat$v
-
-ggplot(data = dat, aes( x= v, y = p.scaled)) + geom_line() + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Phi_A")
-
-dat$Aaa <- dat$Caa + dat$s*dat$p.scaled
-dat$Abb <- dat$Cbb
-dat$Aba <- dat$Cba
-dat$Aab <- dat$Cab
-
-coexist_plot(dat, TRUE)
-
-# try this constraining phi to be greater than or equal to 0
-
-dat <- dat[which(dat$p.scaled >= 0), ]
-
-ggplot(data = dat, aes( x= v, y = p.scaled)) + geom_line() + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Phi_A")
-
-dat$Aaa <- dat$Caa + dat$s*dat$p.scaled
-dat$Abb <- dat$Cbb
-dat$Aba <- dat$Cba
-dat$Aab <- dat$Cab
-
-coexist_plot(dat, TRUE)
-
-# Panel B: Linear Scaling of Sigma
-
-# sigma = -.2 - v
-
-Caa <- rep(-.5, 201)
-Cbb <- rep(-.8, 201)
-Cba <- rep(-.8, 201)
-Cab <- rep(-.5, 201)
-
-s <- rep(-.2, 201)
-p <- rep(.2, 201)
-
-v <- seq(-10, 10, .1)
-
-dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
-
-dat$s.scaled <- dat$s - dat$v
-
-ggplot(data = dat, aes( x= v, y = s.scaled)) + geom_line() + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Phi_A")
-
-dat$Aaa <- dat$Caa + dat$p*dat$s.scaled
-dat$Abb <- dat$Cbb
-dat$Aba <- dat$Cba
-dat$Aab <- dat$Cab
-
-coexist_plot(dat, TRUE)
-
-# Panel C: Sigmoidal Scaling of Phi
-
-# not constraining:
-# phi = ((20)/(1-exp(-v*.5))) - 9.8 
-# constraining:
-# phi = 10.2/(1+exp(5.1-v))
-
-Caa <- rep(-.5, 201)
-Cbb <- rep(-.8, 201)
-Cba <- rep(-.8, 201)
-Cab <- rep(-.5, 201)
-
-s <- rep(-.2, 201)
-p <- rep(.2, 201)
-
-v <- seq(-10, 10, .1)
-
-dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
-
-dat$p.scaled <- (20/(1+exp(-v*.5))) - 9.8
-
-ggplot(data = dat, aes( x= v, y = p.scaled)) + geom_line() + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Phi_A")
-
-dat$Aaa <- dat$Caa + dat$s*dat$p.scaled
-dat$Abb <- dat$Cbb
-dat$Aba <- dat$Cba
-dat$Aab <- dat$Cab
-
-coexist_plot(dat, TRUE)
-
-# trying without - phi values
-
-dat <- dat[which(dat$p.scaled >= 0), ]
-
-ggplot(data = dat, aes( x= v, y = p.scaled)) + geom_line() + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Phi_A")
-
-dat$Aaa <- dat$Caa + dat$s*dat$p.scaled
-dat$Abb <- dat$Cbb
-dat$Aba <- dat$Cba
-dat$Aab <- dat$Cab
-
-coexist_plot(dat, TRUE)
-
-# Panel D: Sigmoidal Scaling of Sigma
-
-# sigma = ((20)/(1+exp(v*.5))) - 10.2
-
-Caa <- rep(-.5, 201)
-Cbb <- rep(-.8, 201)
-Cba <- rep(-.8, 201)
-Cab <- rep(-.5, 201)
-
-s <- rep(-.2, 201)
-p <- rep(.2, 201)
-
-v <- seq(-10, 10, .1)
-
-dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
-
-dat$s.scaled <- (20/(1+exp(v*.5))) - 10.8
-
-ggplot(data = dat, aes( x= v, y = s.scaled)) + geom_line() + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Phi_A")
-
-dat$Aaa <- dat$Caa + dat$p*dat$s.scaled
-dat$Abb <- dat$Cbb
-dat$Aba <- dat$Cba
-dat$Aab <- dat$Cab
-
-coexist_plot(dat, TRUE)
-
-# Panel E: Parabolic Scaling of Phi
-
-# phi = -.1(v-10)^2+10.2
-
-Caa <- rep(-.5, 201)
-Cbb <- rep(-.8, 201)
-Cba <- rep(-.8, 201)
-Cab <- rep(-.5, 201)
-
-s <- rep(-.2, 201)
-p <- rep(.2, 201)
-
-v <- seq(-10, 10, .1)
-
-dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
-
-dat$p.scaled <- -.1*(v-10)^2+10.2
-
-ggplot(data = dat, aes( x= v, y = p.scaled)) + geom_line() + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Phi_A")
-
-dat$Aaa <- dat$Caa + dat$s*dat$p.scaled
-dat$Abb <- dat$Cbb
-dat$Aba <- dat$Cba
-dat$Aab <- dat$Cab
-
-coexist_plot(dat, TRUE)
-
-# only + phi
-
-dat <- dat[which(dat$p.scaled >= 0), ]
-
-ggplot(data = dat, aes( x= v, y = p.scaled)) + geom_line() + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Phi_A")
-
-dat$Aaa <- dat$Caa + dat$s*dat$p.scaled
-dat$Abb <- dat$Cbb
-dat$Aba <- dat$Cba
-dat$Aab <- dat$Cab
-
-coexist_plot(dat, TRUE)
-
-# Panel F: Parabolic Scaling of Sigma
-
-# sigma = .1(v-10)^2-10.2
-
-Caa <- rep(-.5, 201)
-Cbb <- rep(-.8, 201)
-Cba <- rep(-.8, 201)
-Cab <- rep(-.5, 201)
-
-s <- rep(-.2, 201)
-p <- rep(.2, 201)
-
-v <- seq(-10, 10, .1)
-
-dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
-
-dat$s.scaled <- .1*(v-10)^2-10.2
-
-ggplot(data = dat, aes( x= v, y = s.scaled)) + geom_line() + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Phi_A")
-
-dat$Aaa <- dat$Caa + dat$p*dat$s.scaled
-dat$Abb <- dat$Cbb
-dat$Aba <- dat$Cba
-dat$Aab <- dat$Cab
-
-coexist_plot(dat, TRUE)
-
-
-
-# I wonder if this would look different if I was able to show the entire range... 
-# let's have different baselines
 
 # Linear Phi
 Caa <- rep(-.5, 401)
@@ -285,7 +68,7 @@ coexist_plot(dat, TRUE)
 dat <- dat[which(dat$p.scaled >= 0), ]
 
 ggplot(data = dat, aes( x= v, y = p.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Phi_A") + scale_color_gradient(low = "#E8CCF5", high = "#260A33")
+  xlab("Rainfall") + ylab("Phi_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D")
 
 dat$Aaa <- dat$Caa + dat$s*dat$p.scaled
 dat$Abb <- dat$Cbb
@@ -310,7 +93,7 @@ dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
 dat$s.scaled <- dat$s - dat$v
 
 ggplot(data = dat, aes( x= v, y = s.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#E8CCF5", high = "#260A33")
+  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D")
 
 dat$Aaa <- dat$Caa + dat$p*dat$s.scaled
 dat$Abb <- dat$Cbb
@@ -350,7 +133,7 @@ coexist_plot(dat, TRUE)
 dat <- dat[which(dat$p.scaled >= 0), ]
 
 ggplot(data = dat, aes( x= v, y = p.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Phi_A") + scale_color_gradient(low = "#E8CCF5", high = "#260A33")
+  xlab("Rainfall") + ylab("Phi_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D")
 
 dat$Aaa <- dat$Caa + dat$s*dat$p.scaled
 dat$Abb <- dat$Cbb
@@ -377,7 +160,7 @@ dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
 dat$s.scaled <- (4/(1+exp(v*2))) - 2.2
 
 ggplot(data = dat, aes( x= v, y = s.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#E8CCF5", high = "#260A33")
+  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D")
 
 dat$Aaa <- dat$Caa + dat$p*dat$s.scaled
 dat$Abb <- dat$Cbb
@@ -415,7 +198,7 @@ coexist_plot(dat, TRUE)
 dat <- dat[which(dat$p.scaled >= 0), ]
 
 ggplot(data = dat, aes( x= v, y = p.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Phi_A") + scale_color_gradient(low = "#E8CCF5", high = "#260A33")
+  xlab("Rainfall") + ylab("Phi_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D")
 
 dat$Aaa <- dat$Caa + dat$s*dat$p.scaled
 dat$Abb <- dat$Cbb
@@ -442,7 +225,7 @@ dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
 dat$s.scaled <- (1/4)*(v-2)^2-2.2
 
 ggplot(data = dat, aes( x= v, y = s.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#E8CCF5", high = "#260A33")
+  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D")
 
 dat$Aaa <- dat$Caa + dat$p*dat$s.scaled
 dat$Abb <- dat$Cbb
@@ -450,4 +233,116 @@ dat$Aba <- dat$Cba
 dat$Aab <- dat$Cab
 
 coexist_plot(dat, TRUE)
+
+
+
+
+
+
+
+
+
+
+
+## Full Parabolic Scaling of Sigma
+
+# Make optimum 0
+
+Caa <- rep(-.5, 401)
+Cbb <- rep(-.8, 401)
+Cba <- rep(-.8, 401)
+Cab <- rep(-.5, 401)
+
+s <- rep(-.2, 401)
+p <- rep(.2, 401)
+
+v <- seq(-2, 2, .01)
+
+
+dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
+
+dat$s.scaled <- (1/4)*(v)^2-2.2
+
+ggplot(data = dat, aes( x= v, y = s.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
+  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D")
+
+dat$Aaa <- dat$Caa + dat$p*dat$s.scaled
+dat$Abb <- dat$Cbb
+dat$Aba <- dat$Cba
+dat$Aab <- dat$Cab
+
+coexist_plot(dat, TRUE) + xlim(-.5, .5) + ylim(.5, 1.5) #+ theme(legend.position = "none")
+
+# range of possible dynamics is drastically cut as the outcomes repeat past the optimum
+
+# now add another scaling with same optimum at 0
+
+Caa <- rep(-.5, 401)
+Cbb <- rep(-.8, 401)
+Cba <- rep(-.8, 401)
+Cab <- rep(-.5, 401)
+
+s <- rep(-.2, 401)
+p <- rep(.2, 401)
+
+v <- seq(-2, 2, .01)
+
+
+dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
+
+dat$s.scaled <- .25*(v)^2-2.2
+dat$s2.scaled <- .25*(v)^2-2.2
+
+ggplot(data = dat, aes( x= v, y = s.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
+  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D") + 
+  geom_line(aes(x = v+0.2, y = s2.scaled, color = v), size = 5)
+
+ggplot(data = dat, aes( x= v, y = s.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
+  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D")
+
+ggplot(data = dat, aes( x= v, y = s2.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
+  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D")
+
+dat$Aaa <- dat$Caa + dat$p*dat$s.scaled
+dat$Abb <- dat$Cbb + dat$p*dat$s2.scaled
+dat$Aba <- dat$Cba
+dat$Aab <- dat$Cab
+
+coexist_plot(dat, TRUE) + xlim(-.5, .5) + ylim(.5, 1.5) + 
+  theme(legend.position = "none")
+
+# changes the angle, but similarly truncated
+
+# now add another scaling with different optimum
+
+Caa <- rep(-.5, 401)
+Cbb <- rep(-.8, 401)
+Cba <- rep(-.8, 401)
+Cab <- rep(-.5, 401)
+
+s <- rep(-.2, 401)
+p <- rep(.2, 401)
+
+v <- seq(-2, 2, .01)
+
+
+dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
+
+dat$s.scaled <- .25*(v)^2-2.2
+dat$s2.scaled <- .25*(v-1)^2-2.2
+
+ggplot(data = dat, aes( x= v, y = s.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
+  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D") + 
+  geom_line(aes(x = v, y = s2.scaled, color = v), size = 5)
+
+ggplot(data = dat, aes( x= v, y = s2.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
+  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D")
+
+dat$Aaa <- dat$Caa + dat$p*dat$s.scaled
+dat$Abb <- dat$Cbb + dat$p*dat$s2.scaled
+dat$Aba <- dat$Cba
+dat$Aab <- dat$Cab
+
+coexist_plot(dat, TRUE) + xlim(-.5, .5) + ylim(.5, 1.5) + 
+  theme(legend.position = "right")
 

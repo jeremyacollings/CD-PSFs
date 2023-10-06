@@ -50,9 +50,10 @@ for(i in 1:runs){
   alphaBBs[i] <- cBBs[i]+sigBs[i]*phiBs[i]
   alphaABs[i] <- cABs[i]+sigAs[i]*phiBs[i]
   
-  NDs[i] <- ifelse(alphaABs[i] < 0 & alphaBAs[i] < 0 & alphaAAs[i] < 0 & alphaBBs[i] < 0,
+  cutoff <- -1 #trying arbitrary cutoffs to tame FI
+  NDs[i] <- ifelse(alphaABs[i] < cutoff & alphaBAs[i] < cutoff & alphaAAs[i] < cutoff & alphaBBs[i] < cutoff,
                    1 - sqrt((alphaABs[i]*alphaBAs[i])/(alphaAAs[i]*alphaBBs[i])), NA)
-  FIs[i] <- ifelse(alphaABs[i] < 0 & alphaBAs[i] < 0 & alphaAAs[i] < 0 & alphaBBs[i] < 0, ifelse(sqrt((alphaAAs[i]*alphaABs[i])/(alphaBBs[i]*alphaBAs[i])) > sqrt((alphaBBs[i]*alphaBAs[i])/(alphaAAs[i]*alphaABs[i])),
+  FIs[i] <- ifelse(alphaABs[i] < cutoff & alphaBAs[i] < cutoff & alphaAAs[i] < cutoff & alphaBBs[i] < cutoff, ifelse(sqrt((alphaAAs[i]*alphaABs[i])/(alphaBBs[i]*alphaBAs[i])) > sqrt((alphaBBs[i]*alphaBAs[i])/(alphaAAs[i]*alphaABs[i])),
                    sqrt((alphaAAs[i]*alphaABs[i])/(alphaBBs[i]*alphaBAs[i])), sqrt((alphaBBs[i]*alphaBAs[i])/(alphaAAs[i]*alphaABs[i]))), NA)
   
 }
@@ -91,11 +92,42 @@ dat2 <- cbind.data.frame(estimate = c(unlist(summary(fit.FI)[["fixed"]]["Estimat
                                  rownames(summary(fit.ND)[["fixed"]]),
                                  rownames(summary(fit.coexist)[["fixed"]])))
 
+ggplot(data = dat2[which(dat2$par != "Intercept" & dat2$metric != "CX"),], aes(x = par, y = estimate, fill = metric, 
+                                                         ymin = lower, ymax = upper)) + 
+  geom_col(position = position_dodge()) + theme_classic() + 
+  scale_fill_manual(name = "Metric", values = c("#F5D544", "#583B64"), 
+                    labels = c("Fitness Inequalities", "Niche Differences")) + 
+  theme(axis.text.x = element_text(angle = 290, vjust = 0.5, hjust=0, size = 15), 
+        legend.position = "none") + 
+  scale_x_discrete(labels = c(bquote(C[AA]), bquote(C[AB]), bquote(C[BA]), bquote(C[BB]), 
+                              bquote(phi[A]), bquote(phi[B]), bquote(sigma[A]), bquote(sigma[B]))) + 
+  xlab("Parameter") + ylab("Effect Size") + 
+  geom_errorbar(position = position_dodge(width = .9), width = .25)
+
 ggplot(data = dat2[which(dat2$par != "Intercept"),], aes(x = par, y = estimate, fill = metric, 
                                                          ymin = lower, ymax = upper)) + 
   geom_col(position = position_dodge()) + theme_classic() + 
   scale_fill_manual(name = "Metric", values = c( "black", "#F5D544", "#583B64"), 
                     labels = c("Coexistence", "Fitness Inequalities", "Niche Differences")) + 
+  theme(axis.text.x = element_text(angle = 290, vjust = 0.5, hjust=0, size = 15)) + 
+  scale_x_discrete(labels = c(bquote(C[AA]), bquote(C[AB]), bquote(C[BA]), bquote(C[BB]), 
+                              bquote(phi[A]), bquote(phi[B]), bquote(sigma[A]), bquote(sigma[B]))) + 
+  xlab("Parameter") + ylab("Effect Size") + 
+  geom_errorbar(position = position_dodge(width = .9), width = .25)
+
+ggplot(data = dat2[which(dat2$par %in% c("sigA", "sigB", "phiA", "phiB")),], aes(x = par, y = estimate, fill = metric, 
+                                                         ymin = lower, ymax = upper)) + 
+  geom_col(position = position_dodge()) + theme_classic() + 
+  scale_fill_manual(name = "Metric", values = c( "black", "#F5D544", "#583B64"), 
+                    labels = c("Coexistence", "Fitness Inequalities", "Niche Differences")) + 
+  theme(axis.text.x = element_text(angle = 290, vjust = 0.5, hjust=0, size = 15)) + 
+  scale_x_discrete(labels = c(bquote(phi[A]), bquote(phi[B]), bquote(sigma[A]), bquote(sigma[B]))) + 
+  xlab("Parameter") + ylab("Effect Size") + 
+  geom_errorbar(position = position_dodge(width = .9), width = .25)
+
+ggplot(data = dat2[which(dat2$metric == "CX" & dat2$par != "Intercept"),], aes(x = par, y = estimate, fill = metric, 
+                                                    ymin = lower, ymax = upper)) + theme_classic() + 
+  geom_col(color = "grey", fill = "grey") + 
   theme(axis.text.x = element_text(angle = 290, vjust = 0.5, hjust=0, size = 15)) + 
   scale_x_discrete(labels = c(bquote(C[AA]), bquote(C[AB]), bquote(C[BA]), bquote(C[BB]), 
                               bquote(phi[A]), bquote(phi[B]), bquote(sigma[A]), bquote(sigma[B]))) + 
@@ -112,3 +144,4 @@ ggplot(dat[1:500,], aes(x = cAA, y = abs(FI-1))) + geom_point(alpha = .7) +
 ggplot(dat[1:500,], aes(x = cAB, y = abs(FI-1))) + geom_point(alpha = .7) +
   geom_smooth(method = "lm") + ylim(-5, 5)
 
+length(NDs[which(is.na(NDs))])/length(NDs) #90% of the runs are getting thrown out...

@@ -82,8 +82,8 @@ sce3 <- function(Sa2, Sb2, P2a, P2b,
   f <- function(x) 1 / (-x + 1)
   ggplot(data = dat1, aes(x = niche, y = fit)) + 
     geom_point(size = 2, color = "#2F242C") + geom_abline(slope = -1, intercept = 1) + 
-    theme_classic() + stat_function(fun=f) + xlim(-.5, .5) + ylim(.5, 1.5) + 
-    xlab("Niche Difference") + ylab("Fitness Inequality")
+    theme_classic(base_size = 12) + stat_function(fun=f) + xlim(-.5, .5) + ylim(.5, 1.5) + 
+    xlab("Niche Difference") + ylab("Fitness Ratio")
 }
 
 sce3(0, 2.5, 0, 1) # Destabilized into priority effects
@@ -117,8 +117,8 @@ dat1$fit <- fitness_ineq(dat1$Aaa, dat1$Aba, dat1$Abb, dat1$Aab)
 f <- function(x) 1 / (-x + 1)
 ggplot(data = dat1, aes(x = niche, y = fit)) + 
   geom_point(size = 2, color = "#2F242C") + geom_abline(slope = -1, intercept = 1) + 
-  theme_classic() + stat_function(fun=f) + xlim(-.375, .375) + ylim(.75, 1.25) + 
-  xlab("Niche Difference") + ylab("Fitness Inequality")
+  theme_classic(base_size = 12) + stat_function(fun=f) + xlim(-.375, .375) + ylim(.75, 1.25) + 
+  xlab("Niche Difference") + ylab("Fitness Ratio")
 
 ### Microbe-independent context-depency -----
 
@@ -143,9 +143,9 @@ eve <- function(mCaa, mCba, mCbb, mCab,
   f <- function(x) 1 / (-x + 1)
   ggplot(data = dat, aes(x = niche, y = fit, label = v+2.5, color = v)) + 
     geom_point() + geom_abline(slope = -1, intercept = 1) + 
-    theme_classic() + stat_function(fun=f) + xlim(-.375, .375) + ylim(.75, 1.25) + 
-    xlab("Niche Difference") + ylab("Fitness Inequality") + 
-    scale_color_gradient(low = "#E8CCF5", high = "#260A33") + 
+    theme_classic(base_size = 12) + stat_function(fun=f) + xlim(-.375, .375) + ylim(.75, 1.25) + 
+    xlab("Niche Difference") + ylab("Fitness Ratio") + 
+    scale_color_gradient(low = "#F5D544", high = "#844A9D") + 
     theme(legend.position = "none")
   
 }
@@ -178,8 +178,8 @@ mic_eve <- function(mSa1, mSa2, mSb1, mSb2,
   ggplot(data = dat, aes(x = niche, y = fit, label = v+2.5, color = v)) + 
     geom_point() + geom_abline(slope = -1, intercept = 1) + 
     theme_classic() + stat_function(fun=f) + xlim(-.375, .375) + ylim(.75, 1.25) + 
-    xlab("Niche Difference") + ylab("Fitness Inequality") + 
-    scale_color_gradient(low = "#E8CCF5", high = "#260A33") + 
+    xlab("Niche Difference") + ylab("Fitness Ratio") + 
+    scale_color_gradient(low = "#F5D544", high = "#844A9D") + 
     theme(legend.position = "none")
   
 }

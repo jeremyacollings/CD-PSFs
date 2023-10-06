@@ -17,8 +17,8 @@ coexist_plot <- function(d, sterile = FALSE){
   p <- ggplot(d, aes(x = niche, y = fit, color = v)) + 
     geom_point(size = 2) + geom_abline(slope = -1, intercept = 1) + 
     theme_classic(base_size = 12) + stat_function(fun=f) + xlim(-1, 1) + ylim(0, 2) + 
-    xlab("Niche Difference") + ylab("Fitness Inequality") +
-    scale_color_gradient(low = "#E8CCF5", high = "#260A33")
+    xlab("Niche Difference") + ylab("Fitness Ratio") +
+    scale_color_gradient(low = "#F5D544", high = "#844A9D")
   if(sterile == TRUE) p + geom_point(aes(x = nicheS, y = fitS), color = "#2F242C") else p
 }
 
