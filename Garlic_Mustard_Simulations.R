@@ -17,7 +17,7 @@ coexist_plot <- function(d, sterile = FALSE){
   p <- ggplot(d, aes(x = niche, y = fit, color = v)) + 
     geom_point(size = 2) + geom_abline(slope = -1, intercept = 1) + 
     theme_classic(base_size = 12) + stat_function(fun=f) + xlim(-1, 1) + ylim(0, 2) + 
-    xlab("Niche Difference") + ylab("Fitness Ratio") +
+    xlab("Niche Differences") + ylab("Fitness Ratios") +
     scale_color_gradient(low = "#F5D544", high = "#844A9D")
   if(sterile == TRUE) p + geom_point(aes(x = nicheS, y = fitS), color = "#2F242C") else p
 }
@@ -28,19 +28,20 @@ coexist_plot <- function(d, sterile = FALSE){
 
 ## Panel B: Coexistence Plot for Species Specific Pathogen
 
-Caa <- rep(-.5, 201)
-Cbb <- rep(-.8, 201)
-Cba <- rep(-.8, 201)
-Cab <- rep(-.5, 201)
+Caa <- rep(-.005, 201)
+Cbb <- rep(-.008, 201)
+Cba <- rep(-.008, 201)
+Cab <- rep(-.005, 201)
 
-s <- rep(-.2, 201)
+s <- rep(-.002, 201)
 p <- rep(.2, 201)
 
 v <- seq(-10, 10, .1)
 
 dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
 
-dat$p.scaled <- dat$p + dat$v
+dat$p.scaled <- ifelse(dat$p + dat$v >= 0, dat$p + dat$v, 
+                       0)
 
 # Visualizing the scaling function
 
@@ -60,22 +61,22 @@ coexist_plot(dat, TRUE)
 
 ## Panel D: Coexistence Plot for Pathogen + Species Specific Mutualist
 
-Caa <- rep(-.5, 201)
-Cbb <- rep(-.8, 201)
-Cba <- rep(-.8, 201)
-Cab <- rep(-.5, 201)
+Caa <- rep(-.005, 201)
+Cbb <- rep(-.008, 201)
+Cba <- rep(-.008, 201)
+Cab <- rep(-.005, 201)
 
-sa <- rep(-.2, 201)
+sa <- rep(-.002, 201)
 pa <- rep(.2, 201)
-sb <- rep(.2, 201)
+sb <- rep(.002, 201)
 pb <- rep(.2, 201)
 
 v <- seq(-10, 10, .1)
 
 dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, sa, pa, sb, pb, v)
 
-dat$pa.scaled <- dat$pa + dat$v
-dat$pb.scaled <- dat$pb - dat$v
+dat$pa.scaled <- ifelse(dat$pa + dat$v >= 0, dat$pa + dat$v, 0)
+dat$pb.scaled <- ifelse(dat$pb - dat$v >= 0, dat$pb - dat$v, 0)
 
 # Visualizing the scaling functions
 
@@ -96,28 +97,28 @@ coexist_plot(dat, TRUE)
 
 ## Panel F: Coexistence Plot for Pathogen + Mutualist + General Decomposer
 
-Caa <- rep(-.5, 201)
-Cbb <- rep(-.8, 201)
-Cba <- rep(-.8, 201)
-Cab <- rep(-.5, 201)
+Caa <- rep(-.005, 201)
+Cbb <- rep(-.008, 201)
+Cba <- rep(-.008, 201)
+Cab <- rep(-.005, 201)
 
-sP <- rep(-.2, 201)
+sP <- rep(-.002, 201)
 pP <- rep(.2, 201)
-sM <- rep(.2, 201)
+sM <- rep(.002, 201)
 pM <- rep(.2, 201)
-sDa <- rep(.3, 201)
+sDa <- rep(.003, 201)
 pDa <- rep(.2, 201)
-sDb <- rep(.1, 201)
+sDb <- rep(.001, 201)
 pDb <- rep(.2, 201)
 
 v <- seq(-10, 10, .1)
 
 dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, sP, pP, sM, pM, sDa, pDa, sDb, pDb, v)
 
-dat$pP.scaled <- dat$pP + dat$v
-dat$pM.scaled <- dat$pM - .5*dat$v
-dat$pDa.scaled <- dat$pDa + dat$v
-dat$pDb.scaled <- dat$pDb + dat$v
+dat$pP.scaled <- ifelse(dat$pP + dat$v >= 0, dat$pP + dat$v, 0)
+dat$pM.scaled <- ifelse(dat$pM - .5*dat$v >= 0, dat$pM - .5*dat$v, 0)
+dat$pDa.scaled <- ifelse(dat$pDa + dat$v >= 0, dat$pDa + dat$v, 0)
+dat$pDb.scaled <- ifelse(dat$pDb + dat$v >= 0, dat$pDb + dat$v, 0)
 
 # Visualizing the scaling functions
 

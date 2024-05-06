@@ -26,30 +26,32 @@ coexist_plot <- function(d, sterile = FALSE){
 
 # Panel B shows the scaling function for sigma
 
-v <- -100:100
-sig <- .2 + .01*v
+v <- seq(-10, 10, .1)
+sig <- .0002 + .001*v
 dat <- cbind.data.frame(sig, v)
-dat2 <- data.frame(v = c(-75, 0, 75), sig = c(.2 + .01*-75, .2 + .01*0, .2 + .01*75))
+dat2 <- data.frame(v = c(-7.5, 0, 7.5), sig = c(.0002 + .001*-7.5, 
+                                                .0002 + .001*0, 
+                                                .0002 + .001*7.5))
 ggplot(data = dat, aes(x = v, y = sig)) + geom_smooth(color = "black") + 
   ylab(expression(sigma)) + xlab("Environmental Variable") + theme_classic() +
-  geom_point(data = dat2, aes(x = v, y = sig), shape = 1, color = "#A7A5C6", size = 7)
+  geom_point(data = dat2, aes(x = v, y = sig), shape = 1, color = "#844A9D", size = 7)
 
 # Panel C is a triptych plot showing the downstream effect of scaling sigma on alphas
 
-v <- -100:100
+v <- seq(-10, 10, .1)
 
-Caa <- c(rep(-1, 201))
-Cab <- c(rep(-.8, 201))
-Cbb <- c(rep(-1.25, 201))
-Cba <- c(rep(-.9, 201))
+Caa <- c(rep(-.01, 201))
+Cab <- c(rep(-.008, 201))
+Cbb <- c(rep(-.0125, 201))
+Cba <- c(rep(-.009, 201))
 
 Pa <- c(rep(.2, 201))
 Pb <- c(rep(.2, 201))
 
-Sa <- c(rep(.2, 201))
-Sb <- c(rep(.2, 201))
+Sa <- c(rep(.0002, 201))
+Sb <- c(rep(.0002, 201))
 
-Sa2 <- Sa + .01*v
+Sa2 <- Sa + .001*v
 
 Aaa <- Caa + Pa*Sa2
 Aba <- Cba + Pa*Sb
@@ -58,11 +60,15 @@ Aab <- Cab + Pa*Sa2
 
 dat <- cbind.data.frame(v, Caa, Cab, Cbb, Cba, Aaa, Aba, Abb, Aab)
 
-dat2 <- data.frame(v = c(-75, 0, 75), 
-                   Aaa = c(-1 + .2*(.2+.01*-75), -1 + .2*(.2+.01*0), -1 + .2*(.2+.01*75)), 
-                   Aba = rep(-.9 + .2*.2, 3), 
-                   Abb = rep(-1.25 + .2*.2, 3), 
-                   Aab = c(-.8 + .2*(.2+.01*-75), -.8 + .2*(.2+.01*0), -.8 + .2*(.2+.01*75)))
+dat2 <- data.frame(v = c(-7.5, 0, 7.5), 
+                   Aaa = c(-.01 + .2*(.0002+.001*-7.5), 
+                           -.01 + .2*(.0002+.001*0), 
+                           -.01 + .2*(.0002+.001*7.5)), 
+                   Aba = rep(-.009 + .2*.0002, 3), 
+                   Abb = rep(-.0125 + .2*.0002, 3), 
+                   Aab = c(-.008 + .2*(.0002+.001*-7.5), 
+                           -.008 + .2*(.0002+.001*0), 
+                           -.008 + .2*(.0002+.001*7.5)))
 dat2$niche <- 1 - sqrt((dat2$Aba * dat2$Aab)/(dat2$Aaa * dat2$Abb))
 dat2$fit <- sqrt((dat2$Aaa * dat2$Aab) / (dat2$Abb * dat2$Aba))
 
@@ -71,6 +77,6 @@ strokes <- dat2[, 2:5]*2 # numerical value for stroke sizes in alpha plot; strok
 # Panel D contains the coexistence plot with the environmental gradient
 
 coexist_plot(dat, sterile = FALSE) + 
-  geom_point(data = dat2, aes(x = niche, y = fit), color = "#A7A5C6", size = 5, shape = 1) + 
+  geom_point(data = dat2, aes(x = niche, y = fit), color = "#844A9D", size = 5, shape = 1) + 
   xlim(-0.5, 0.5) + ylim(0.5, 1.5)
 

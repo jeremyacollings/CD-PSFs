@@ -93,7 +93,7 @@ dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
 dat$s.scaled <- dat$s - dat$v
 
 ggplot(data = dat, aes( x= v, y = s.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D")
+  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#4381A4", high = "#F09021")
 
 dat$Aaa <- dat$Caa + dat$p*dat$s.scaled
 dat$Abb <- dat$Cbb
@@ -160,7 +160,7 @@ dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
 dat$s.scaled <- (4/(1+exp(v*2))) - 2.2
 
 ggplot(data = dat, aes( x= v, y = s.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D")
+  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#4381A4", high = "#F09021")
 
 dat$Aaa <- dat$Caa + dat$p*dat$s.scaled
 dat$Abb <- dat$Cbb
@@ -198,7 +198,7 @@ coexist_plot(dat, TRUE)
 dat <- dat[which(dat$p.scaled >= 0), ]
 
 ggplot(data = dat, aes( x= v, y = p.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Phi_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D")
+  xlab("Rainfall") + ylab("Phi_A") + scale_color_gradient(low = "#4381A4", high = "#F09021")
 
 dat$Aaa <- dat$Caa + dat$s*dat$p.scaled
 dat$Abb <- dat$Cbb
@@ -225,7 +225,7 @@ dat <- cbind.data.frame(Caa, Cbb, Cba, Cab, s, p, v)
 dat$s.scaled <- (1/4)*(v-2)^2-2.2
 
 ggplot(data = dat, aes( x= v, y = s.scaled, color = v)) + geom_line(size = 5) + theme_classic(base_size = 12) + 
-  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#F5D544", high = "#844A9D")
+  xlab("Rainfall") + ylab("Sig_A") + scale_color_gradient(low = "#4381A4", high = "#F09021")
 
 dat$Aaa <- dat$Caa + dat$p*dat$s.scaled
 dat$Abb <- dat$Cbb
