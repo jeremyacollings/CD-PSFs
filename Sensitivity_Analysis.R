@@ -1,10 +1,8 @@
 
 set.seed(6)
-library(epiR)
 library(tidyverse)
-library(scales)
 
-# Sensitivity Analysis for Collings et al. 2024
+# Visual Sensitivity Analysis for Collings et al. 2025
 
 niche_diff <- function(Aaa, Aba, Abb, Aab) {
   ifelse(Aaa < 0 & Aba < 0 & Abb < 0 & Aab < 0, 
@@ -33,7 +31,7 @@ std_params <- function(mymin, mymax, xvals) {
   return(y)
 }
 
-### Visual Sensitivity Analysis -----
+### Phi & Sigma Parameterization -----
 
 # as a starting point, let's modify a bit the first live scenario in the 
 # theory simulations
@@ -66,8 +64,8 @@ Caa <- rep(-0.06, 1001)
 Cba <- rep(-0.05, 1001)
 Cbb <- rep(-0.075, 1001)
 Cab <- rep(-0.055, 1001)
-Sax <- rep(0.002, 1001)
-Sbx <- rep(0.00225, 1001)
+Sax <- rep(-0.002, 1001)
+Sbx <- rep(-0.00225, 1001)
 Pxa <- rep(10.5, 1001)
 Pxb <- rep(10, 1001)
 
@@ -202,127 +200,374 @@ ggplot(data = sens_dat, aes(x = val, y = FRs, color = par, linetype = type)) +
                                 "#F5D544", "#D5B00B", 
                                 "#FF7F11", "#FFB370"))
 
-### Local Sensitivity Analysis -----
+### m Parameterization -----
+
+# get min and max m values
+min_Maa <- min(outer(Sax2, Pxa2)); max_Maa <- max(outer(Sax2, Pxa2))
+min_Mab <- min(outer(Sax2, Pxb2)); max_Mab <- max(outer(Sax2, Pxb2))
+min_Mba <- min(outer(Sbx2, Pxb2)); max_Mba <- max(outer(Sbx2, Pxb2))
+min_Mbb <- min(outer(Sbx2, Pxb2)); max_Mbb <- max(outer(Sbx2, Pxb2))
+
+Caa <- rep(-0.06, 1001)
+Cba <- rep(-0.05, 1001)
+Cbb <- rep(-0.075, 1001)
+Cab <- rep(-0.055, 1001)
+Maa <- rep(-0.002 * 10.5, 1001)
+Mba <- rep(-0.00225 * 10.5, 1001)
+Mbb <- rep(-0.00225 * 10, 1001)
+Mab <- rep(-0.002 * 10, 1001)
 
 ##### Niche Differences -----
 
-ND_sens <- deriv(expression(1 - sqrt(((c_ij + sig_ix*phi_xj)*(c_ji + sig_jx*phi_xi))/
-                            ((c_ii + sig_ix*phi_xi)*(c_jj + sig_jx*phi_xj)))), 
-      c("c_ij", "c_ji", "c_jj", "c_ii", "sig_ix", "sig_jx", "phi_xi", "phi_xj"))
+Caa2 <- seq(-.1, 0, .0001)
+Aaa <- Caa2 + Maa
+Aba <- Cba + Mba
+Abb <- Cbb + Mbb
+Aab <- Cab + Mab
+ND_Caa <- niche_diff(Aaa, Aba, Abb, Aab)
+FI_Caa <- fitness_ineq(Aaa, Aba, Abb, Aab)
+FR_Caa <- fitness_ratio(Aaa, Aba, Abb, Aab)
 
-c_ii = -0.06; c_jj = -0.075; c_ji = -0.05; c_ij = -0.055
-sig_ix = 0.002; sig_jx = 0.00225; phi_xi = 10.5; phi_xj = 10
+Cba2 <- seq(-.1, 0, .0001)
+Aaa <- Caa + Maa
+Aba <- Cba2 + Mba
+Abb <- Cbb + Mbb
+Aab <- Cab + Mab
+ND_Cba <- niche_diff(Aaa, Aba, Abb, Aab)
+FI_Cba <- fitness_ineq(Aaa, Aba, Abb, Aab)
+FR_Cba <- fitness_ratio(Aaa, Aba, Abb, Aab)
 
-ggplot(data = cbind.data.frame(vals = as.numeric(attr(eval(ND_sens), "gradient")), 
-                               pars = c("c_ij", "c_ji", "c_jj", "c_ii", 
-                                        "sig_ix", "sig_jx", "phi_xi", "phi_xj")), 
-       aes(x = pars, y = vals)) + 
-         geom_bar(stat = "identity") + 
-  theme_classic(base_size = 15) + ylab("Sensitivity of Niche Differences") + xlab("Parameter")
+Cbb2 <- seq(-.1, 0, .0001)
+Aaa <- Caa + Maa
+Aba <- Cba + Mba
+Abb <- Cbb2 + Mbb
+Aab <- Cab + Mab
+ND_Cbb <- niche_diff(Aaa, Aba, Abb, Aab)
+FI_Cbb <- fitness_ineq(Aaa, Aba, Abb, Aab)
+FR_Cbb <- fitness_ratio(Aaa, Aba, Abb, Aab)
 
-##### Fitness Ratios -----
+Cab2 <- seq(-.1, 0, .0001)
+Aaa <- Caa + Maa
+Aba <- Cba + Mba
+Abb <- Cbb + Mbb
+Aab <- Cab2 + Mab
+ND_Cab <- niche_diff(Aaa, Aba, Abb, Aab)
+FI_Cab <- fitness_ineq(Aaa, Aba, Abb, Aab)
+FR_Cab <- fitness_ratio(Aaa, Aba, Abb, Aab)
 
-FR_sens <- deriv(expression(sqrt(((c_ij + sig_ix*phi_xj)*(c_ii + sig_ix*phi_xi))/
-                                       ((c_ji + sig_jx*phi_xi)*(c_jj + sig_jx*phi_xj)))), 
-                 c("c_ij", "c_ji", "c_jj", "c_ii", "sig_ix", "sig_jx", "phi_xi", "phi_xj"))
+Maa2 <- seq(min_Maa, max_Maa, .0004)
+Aaa <- Caa + Maa2
+Aba <- Cba + Mba
+Abb <- Cbb + Mbb
+Aab <- Cab + Mab
+ND_Maa <- niche_diff(Aaa, Aba, Abb, Aab)
+FI_Maa <- fitness_ineq(Aaa, Aba, Abb, Aab)
+FR_Maa <- fitness_ratio(Aaa, Aba, Abb, Aab)
 
-c_ii = -0.06; c_jj = -0.075; c_ji = -0.05; c_ij = -0.055
-sig_ix = 0.002; sig_jx = 0.00225; phi_xi = 10.5; phi_xj = 10
+Mba2 <- seq(min_Mba, max_Mba, .0004)
+Aaa <- Caa + Maa
+Aba <- Cba + Mba2
+Abb <- Cbb + Mbb
+Aab <- Cab + Mab
+ND_Mba <- niche_diff(Aaa, Aba, Abb, Aab)
+FI_Mba <- fitness_ineq(Aaa, Aba, Abb, Aab)
+FR_Mba <- fitness_ratio(Aaa, Aba, Abb, Aab)
 
-FR_sens_values <- as.numeric(attr(eval(FR_sens), "gradient"))
-ND_sens_values <- as.numeric(attr(eval(ND_sens), "gradient"))
+Mbb2 <- seq(min_Mbb, max_Mbb, .0004)
+Aaa <- Caa + Maa
+Aba <- Cba + Mba
+Abb <- Cbb + Mbb2
+Aab <- Cab + Mab
+ND_Mbb <- niche_diff(Aaa, Aba, Abb, Aab)
+FI_Mbb <- fitness_ineq(Aaa, Aba, Abb, Aab)
+FR_Mbb <- fitness_ratio(Aaa, Aba, Abb, Aab)
 
-ggplot(data = cbind.data.frame(vals = c(-FR_sens_values[1:4], FR_sens_values[5:8]), 
-                               pars = c("c_ij", "c_ji", "c_jj", "c_ii", 
-                                        "sig_ix", "sig_jx", "phi_xi", "phi_xj")), 
-       aes(x = pars, y = vals)) + 
-  geom_bar(stat = "identity") + 
-  theme_classic(base_size = 15) + ylab("Sensitivity of Fitness Ratio") + xlab("Parameter")
+Mab2 <- seq(min_Mab, max_Mab, .0004)
+Aaa <- Caa + Maa
+Aba <- Cba + Mba
+Abb <- Cbb + Mbb
+Aab <- Cab + Mab2
+ND_Mab <- niche_diff(Aaa, Aba, Abb, Aab)
+FI_Mab <- fitness_ineq(Aaa, Aba, Abb, Aab)
+FR_Mab <- fitness_ratio(Aaa, Aba, Abb, Aab)
 
-ggplot(data = cbind.data.frame(vals = c(c(-FR_sens_values[1:4], FR_sens_values[5:8]), 
-                                        c(-ND_sens_values[1:4], ND_sens_values[5:8])), 
-                               pars = rep(c("c_ij", "c_ji", "c_jj", "c_ii", 
-                                        "sig_ix", "sig_jx", "phi_xi", "phi_xj"), 2), 
-                               metric = c(rep("FR", 8), rep("ND", 8))), 
-       aes(x = pars, y = vals, fill = metric)) + 
-  geom_bar(stat = "identity", position = "dodge") + 
-  scale_y_continuous(trans= pseudo_log_trans(), 
-                     breaks = c(-250, -100, -10, -1, 0, 1, 10, 100, 250, 500)) + 
-  theme_classic(base_size = 15) + ylab("Pseudo-Log Sensitivity") + xlab("Parameter") + 
-  scale_fill_manual(name = "Metric", labels = c("Fitness Ratio", "Niche Differences"), 
-                    values = c("#F5D544", "#844A9D"))
+sens_dat2 <- cbind.data.frame(NDs = c(ND_Caa, ND_Cba, 
+                                     ND_Cbb, ND_Cab, 
+                                     ND_Maa, ND_Mba, 
+                                     ND_Mbb, ND_Mab),
+                             FIs = c(FI_Caa, FI_Cba, 
+                                     FI_Cbb, FI_Cab, 
+                                     FI_Maa, FI_Mba, 
+                                     FI_Mbb, FI_Mab),
+                             FRs = c(FR_Caa, FR_Cba, 
+                                     FR_Cbb, FR_Cab, 
+                                     FR_Maa, FR_Mba, 
+                                     FR_Mbb, FR_Mab), 
+                             par = rep(c("Caa", "Cba", "Cbb", "Cab", 
+                                         "Maa", "Mba", "Mbb", "Mab"), each = 1001), 
+                             val = c(std_params(0, 0.1, abs(Caa2)), 
+                                     std_params(0, 0.1, abs(Cba2)), 
+                                     std_params(0, 0.1, abs(Cbb2)), 
+                                     std_params(0, 0.1, abs(Cab2)), 
+                                     std_params(min_Maa, max_Maa, Maa2), 
+                                     std_params(min_Mba, max_Mba, Mba2), 
+                                     std_params(min_Mbb, max_Mbb, Mbb2), 
+                                     std_params(min_Mab, max_Mab, Mab2)), 
+                             type = rep(c("plant", "microbe"), each = 1001*4))
 
-ggplot(data = cbind.data.frame(vals = c(c(-FR_sens_values[1:4], FR_sens_values[5:8]), 
-                                        c(-ND_sens_values[1:4], ND_sens_values[5:8])), 
-                               pars = rep(c("c_ij", "c_ji", "c_jj", "c_ii", 
-                                            "sig_ix", "sig_jx", "phi_xi", "phi_xj"), 2), 
-                               metric = c(rep("FR", 8), rep("ND", 8))), 
-       aes(x = pars, y = vals, fill = metric)) + 
-  geom_bar(stat = "identity", position = "dodge") + 
-  theme_classic(base_size = 15) + ylab("Sensitivity") + xlab("Parameter") + 
-  scale_fill_manual(name = "Metric", labels = c("Fitness Ratio", "Niche Differences"), 
-                    values = c("#F5D544", "#844A9D"))
+ggplot(data = sens_dat, aes(x = val, y = NDs, color = par, linetype = type)) + 
+  geom_line(size = 1.5) + ylim(-1, 1) + 
+  theme_classic(base_size = 12) + ylab("Niche Differences") + 
+  xlab("Parameter Value") + theme_classic(base_size = 15) + 
+  theme(axis.text.x = element_blank()) +
+  scale_color_manual(name = "Parameter", 
+                     values = c("#844A9D", "#B990CB", 
+                                "#462753", "#DDC7E5", 
+                                "#F5D544", "#D5B00B", 
+                                "#FF7F11", "#FFB370"))
 
-### Regression Sensitivity Analysis -----
+ggplot(data = sens_dat, aes(x = val, y = FIs, color = par, linetype = type)) + 
+  geom_line(size = 1.5) + ylim(1, 2) + 
+  theme_classic(base_size = 12) + ylab("Fitness Inequalities") + 
+  xlab("Parameter Value") + theme_classic(base_size = 15) + 
+  theme(axis.text.x = element_blank()) + 
+  scale_color_manual(name = "Parameter", 
+                     values = c("#844A9D", "#B990CB", 
+                                "#462753", "#DDC7E5", 
+                                "#F5D544", "#D5B00B", 
+                                "#FF7F11", "#FFB370"))
 
-c_min <- -.1; c_max <- 0
-sig_min <- -.01; sig_max <- .01
-phi_min <- 0; phi_max <- 20
+ggplot(data = sens_dat, aes(x = val, y = FRs, color = par, linetype = type)) + 
+  geom_line(size = 1.5) + ylim(0, 2) + 
+  theme_classic(base_size = 12) + ylab("Fitness Ratios") + 
+  xlab("Parameter Value") + theme_classic(base_size = 15) + 
+  theme(axis.text.x = element_blank()) + 
+  scale_color_manual(name = "Parameter", 
+                     values = c("#844A9D", "#B990CB", 
+                                "#462753", "#DDC7E5", 
+                                "#F5D544", "#D5B00B", 
+                                "#FF7F11", "#FFB370"))
 
-# some empty vectors to throw values into
-cAAs <- cBAs <- cBBs <- cABs <- c()
-sigAs <- sigBs <- phiAs <- phiBs <- c()
-alphaAAs <- alphaBAs <- alphaBBs <- alphaABs <- c()
-NDs <- FIs <- c()
 
-cutoff <- 0
-# generating data from 5000 runs
-runs <- 100000
-for(i in 1:runs){
-  cAAs[i] <- runif(1, min = c_min, max = c_max)
-  cBAs[i] <- runif(1, min = c_min, max = c_max)
-  cBBs[i] <- runif(1, min = c_min, max = c_max)
-  cABs[i] <- runif(1, min = c_min, max = c_max)
-  
-  sigAs[i] <- runif(1, min = sig_min, max = sig_max)
-  sigBs[i] <- runif(1, min = sig_min, max = sig_max)
-  
-  phiAs[i] <- runif(1, min = phi_min, max = phi_max)
-  phiBs[i] <- runif(1, min = phi_min, max = phi_max)
-  
-  alphaAAs[i] <- cAAs[i]+sigAs[i]*phiAs[i]
-  alphaBAs[i] <- cBAs[i]+sigBs[i]*phiAs[i]
-  alphaBBs[i] <- cBBs[i]+sigBs[i]*phiBs[i]
-  alphaABs[i] <- cABs[i]+sigAs[i]*phiBs[i]
-  
-  cutoff <- -0.0075 #trying arbitrary cutoffs to tame FI
-  NDs[i] <- ifelse(alphaABs[i] < cutoff & alphaBAs[i] < cutoff & alphaAAs[i] < cutoff & alphaBBs[i] < cutoff,
-                   1 - sqrt((alphaABs[i]*alphaBAs[i])/(alphaAAs[i]*alphaBBs[i])), NA)
-  FIs[i] <- ifelse(alphaABs[i] < cutoff & alphaBAs[i] < cutoff & alphaAAs[i] < cutoff & alphaBBs[i] < cutoff, sqrt((alphaAAs[i]*alphaABs[i])/(alphaBBs[i]*alphaBAs[i])), NA)
-  
-}
+# putting this into the right order for the figure
 
-length(alphaAAs) - sum(alphaABs < cutoff & alphaBAs < cutoff & alphaAAs < cutoff & alphaBBs < cutoff)
-(length(alphaAAs) - sum(alphaABs < cutoff & alphaBAs < cutoff & alphaAAs < cutoff & alphaBBs < cutoff))/length(alphaAAs)
+sens_dat3 <- rbind(sens_dat, sens_dat2[which(sens_dat2$par %in% 
+                                  c("Maa", "Mba", "Mbb", "Mab")),])
 
-PRCC_dat <- cbind.data.frame(cAA = scale(abs(cAAs)), cBA = scale(abs(cBAs)), 
-                        cBB = scale(abs(cBBs)), cAB = scale(abs(cABs)),
-                        sigA = scale(sigAs), sigB = scale(sigBs), 
-                        phiA = scale(phiAs), phiB = scale(phiBs), 
-                        alphaAA = alphaAAs, alphaBA = alphaBAs, 
-                        alphaBB = alphaBBs, alphaAB = alphaABs, 
-                        ND = NDs, FI = FIs)
+sens_dat3$plot_index <- ifelse(sens_dat3$par %in% c("Caa", "Cba", 
+                                                    "Cbb", "Cab"), "comp", 
+                               ifelse(sens_dat3$par %in% c("Maa", "Mba", 
+                                                           "Mbb", "Mab"), "m",
+                                      ifelse(sens_dat3$par %in%
+                                               c("Sax", "Sbx", 
+                                                 "Pxa", "Pxb"), "micro", NA)))
 
-PRCC_dat2 <- rbind.data.frame(epi.prcc(PRCC_dat[complete.cases(PRCC_dat),c(1:8,13)]), 
-                         epi.prcc(PRCC_dat[complete.cases(PRCC_dat),c(1:8,14)]))
+# get little dataframe of baseline values
+baseline_sens <- sens_dat3 %>%
+  filter((par == "Caa" & val == std_params(-0.1, 0, Caa[1])) | 
+           (par == "Cab" & val == std_params(-0.1, 0, Cab[1])) | 
+           (par == "Cba" & val == std_params(-0.1, 0, Cba[1])) | 
+           (par == "Cbb" & val == std_params(-0.1, 0, Cbb[1])) | 
+           (par == "Sax" & val == std_params(-0.01, 0.01, Sax[1])) | 
+           (par == "Sbx" & val == std_params(-0.01, 0.01, Sbx[1])) | 
+           (par == "Pxa" & val == std_params(0, 20, Pxa[1])) | 
+           (par == "Pax" & val == std_params(0, 20, Pxb[1])) | 
+           (par == "Maa" & val == std_params(min_Maa, max_Maa, Maa[1])) | 
+           (par == "Mab" & val == std_params(min_Mab, max_Mab, Mab[1])) | 
+           (par == "Mba" & val == std_params(min_Mba, max_Mba, Mba[1])) | 
+           (par == "Mbb" & val == std_params(min_Mbb, max_Mbb, Mbb[1])))
 
-PRCC_dat2$metric <- c(rep("ND", 8), rep("FR", 8))
+cbind.data.frame(par = c("Caa"), 
+                 val = std_params(-0.1, 0, Caa[1]), 
+                 NDs = niche_diff(Aaa[1], Aab[1], Aba[1], Abb[2]))
+# ND
 
-ggplot(data = PRCC_dat2, 
-       aes(x = var, y = est, ymin = lower, ymax = upper, fill = metric)) + 
-  geom_bar(stat = "identity", position = position_dodge(width = .9)) + 
-  geom_errorbar(width = 0, position = position_dodge(width = .9)) + 
-  theme_classic(base_size = 15) + ylab("PRCC Sensitivity") + xlab("Parameter") + 
-  scale_fill_manual(name = "Metric", labels = c("Fitness Ratio", "Niche Differences"), 
-                    values = c("#F5D544", "#844A9D"))
+sens_dat3 %>%
+  filter(plot_index == "comp") %>%
+  ggplot(aes(x = val, y = NDs, color = par)) +
+  geom_hline(yintercept = niche_diff(Aaa = Caa[1] + Maa[1], 
+                                     Aab = Cab[1] + Mab[1], 
+                                     Aba = Cba[1] + Mba[1], 
+                                     Abb = Cbb[1] + Mbb[1]), 
+             size = 1.5) + 
+  geom_line(size = 1.5) + ylim(-1, 1) + 
+  theme_classic(base_size = 12) + ylab("Niche Differences") + 
+  xlab("Parameter Value") + theme_classic(base_size = 15) + 
+  theme(axis.text.x = element_blank()) + 
+  scale_color_manual(name = "Parameter", 
+                     values = c("#844A9D", "#B990CB", 
+                                "#DDC7E5", "#462753")) + 
+  theme(legend.position = "none")
 
+ggsave(file.path("Figures", "VSA_ND_comp.pdf"), 
+       width = 5, height = 4, units = "in")
+
+sens_dat3 %>%
+  filter(plot_index == "micro") %>%
+  ggplot(aes(x = val, y = NDs, color = par, linetype = type)) + 
+  geom_hline(yintercept = niche_diff(Aaa = Caa[1] + Maa[1], 
+                                     Aab = Cab[1] + Mab[1], 
+                                     Aba = Cba[1] + Mba[1], 
+                                     Abb = Cbb[1] + Mbb[1]), 
+             size = 1.5) + 
+  geom_line(size = 1.5) + ylim(-1, 1) + 
+  theme_classic(base_size = 12) + ylab("Niche Differences") + 
+  xlab("Parameter Value") + theme_classic(base_size = 15) + 
+  theme(axis.text.x = element_blank()) + 
+  scale_color_manual(name = "Parameter", 
+                     values = c("#F5D544", "#D5B00B", 
+                                "#FF7F11", "#FFB370")) + 
+  theme(legend.position = "none")
+
+ggsave(file.path("Figures", "VSA_ND_micro1.pdf"), 
+       width = 5, height = 4, units = "in")
+
+sens_dat3 %>%
+  filter(plot_index == "m") %>%
+  ggplot(aes(x = val, y = NDs, color = par, linetype = type)) + 
+  geom_hline(yintercept = niche_diff(Aaa = Caa[1] + Maa[1], 
+                                     Aab = Cab[1] + Mab[1], 
+                                     Aba = Cba[1] + Mba[1], 
+                                     Abb = Cbb[1] + Mbb[1]), 
+             size = 1.5) + 
+  geom_line(size = 1.5) + ylim(-1, 1) + 
+  theme_classic(base_size = 12) + ylab("Niche Differences") + 
+  xlab("Parameter Value") + theme_classic(base_size = 15) + 
+  theme(axis.text.x = element_blank()) + 
+  scale_color_manual(name = "Parameter", 
+                     values = c("#3B747D","#58A4B0", 
+                                "#9ECAD1", "#214045")) + 
+  theme(legend.position = "none")
+
+ggsave(file.path("Figures", "VSA_ND_micro2.pdf"), 
+       width = 5, height = 4, units = "in")
+
+# FR
+
+sens_dat3 %>%
+  filter(plot_index == "comp") %>%
+  ggplot(aes(x = val, y = FRs, color = par, linetype = type)) + 
+  geom_hline(yintercept = fitness_ratio(Aaa = Caa[1] + Maa[1], 
+                                     Aab = Cab[1] + Mab[1], 
+                                     Aba = Cba[1] + Mba[1], 
+                                     Abb = Cbb[1] + Mbb[1]), 
+             size = 1.5) + 
+  geom_line(size = 1.5) + ylim(0, 2) + 
+  theme_classic(base_size = 12) + ylab("Fitness Ratios") + 
+  xlab("Parameter Value") + theme_classic(base_size = 15) + 
+  theme(axis.text.x = element_blank()) + 
+  scale_color_manual(name = "Parameter", 
+                     values = c("#844A9D", "#B990CB", 
+                                "#DDC7E5", "#462753")) + 
+  theme(legend.position = "none")
+
+ggsave(file.path("Figures", "VSA_FR_comp.pdf"), 
+       width = 5, height = 4, units = "in")
+
+sens_dat3 %>%
+  filter(plot_index == "micro") %>%
+  ggplot(aes(x = val, y = FRs, color = par, linetype = type)) + 
+  geom_hline(yintercept = fitness_ratio(Aaa = Caa[1] + Maa[1], 
+                                     Aab = Cab[1] + Mab[1], 
+                                     Aba = Cba[1] + Mba[1], 
+                                     Abb = Cbb[1] + Mbb[1]), 
+             size = 1.5) + 
+  geom_line(size = 1.5) + ylim(0, 2) + 
+  theme_classic(base_size = 12) + ylab("Fitness Ratios") + 
+  xlab("Parameter Value") + theme_classic(base_size = 15) + 
+  theme(axis.text.x = element_blank()) + 
+  scale_color_manual(name = "Parameter", 
+                     values = c("#F5D544", "#D5B00B", 
+                                "#FF7F11", "#FFB370")) + 
+  theme(legend.position = "none")
+
+ggsave(file.path("Figures", "VSA_FR_micro1.pdf"), 
+       width = 5, height = 4, units = "in")
+
+sens_dat3 %>%
+  filter(plot_index == "m") %>%
+  ggplot(aes(x = val, y = FRs, color = par, linetype = type)) + 
+  geom_hline(yintercept = fitness_ratio(Aaa = Caa[1] + Maa[1], 
+                                     Aab = Cab[1] + Mab[1], 
+                                     Aba = Cba[1] + Mba[1], 
+                                     Abb = Cbb[1] + Mbb[1]), 
+             size = 1.5) + 
+  geom_line(size = 1.5) + ylim(0, 2) + 
+  theme_classic(base_size = 12) + ylab("Fitness Ratios") + 
+  xlab("Parameter Value") + theme_classic(base_size = 15) + 
+  theme(axis.text.x = element_blank()) + 
+  scale_color_manual(name = "Parameter", 
+                     values = c("#3B747D","#58A4B0", 
+                                "#9ECAD1", "#214045")) + 
+  theme(legend.position = "none")
+
+ggsave(file.path("Figures", "VSA_FR_micro2.pdf"), 
+       width = 5, height = 4, units = "in")
+
+
+# FI (Appendix S3)
+
+sens_dat3 %>%
+  filter(plot_index == "comp") %>%
+  ggplot(aes(x = val, y = FIs, color = par, linetype = type)) + 
+  geom_line(size = 1.5) + ylim(1, 2) + 
+  theme_classic(base_size = 12) + ylab("Fitness Inequalities") + 
+  xlab("Parameter Value") + theme_classic(base_size = 15) + 
+  theme(axis.text.x = element_blank()) + 
+  scale_color_manual(name = "Parameter", 
+                     values = c("#844A9D", "#B990CB", 
+                                "#DDC7E5", "#462753")) + 
+  theme(legend.position = "none")
+
+ggsave(file.path("Figures", "VSA_FI_comp.pdf"), 
+       width = 5, height = 4, units = "in")
+
+sens_dat3 %>%
+  filter(plot_index == "micro") %>%
+  ggplot(aes(x = val, y = FIs, color = par, linetype = type)) + 
+  geom_line(size = 1.5) + ylim(1, 2) + 
+  theme_classic(base_size = 12) + ylab("Fitness Inequalities") + 
+  xlab("Parameter Value") + theme_classic(base_size = 15) + 
+  theme(axis.text.x = element_blank()) + 
+  scale_color_manual(name = "Parameter", 
+                     values = c("#F5D544", "#D5B00B", 
+                                "#FF7F11", "#FFB370")) + 
+  theme(legend.position = "none")
+
+ggsave(file.path("Figures", "VSA_FI_micro1.pdf"), 
+       width = 5, height = 4, units = "in")
+
+sens_dat3 %>%
+  filter(plot_index == "m") %>%
+  ggplot(aes(x = val, y = FIs, color = par, linetype = type)) + 
+  geom_line(size = 1.5) + ylim(1, 2) + 
+  theme_classic(base_size = 12) + ylab("Fitness Inequalities") + 
+  xlab("Parameter Value") + theme_classic(base_size = 15) + 
+  theme(axis.text.x = element_blank()) + 
+  scale_color_manual(name = "Parameter", 
+                     values = c("#3B747D","#58A4B0", 
+                                "#9ECAD1", "#214045")) + 
+  theme(legend.position = "none")
+
+ggsave(file.path("Figures", "VSA_FI_micro2.pdf"), 
+       width = 5, height = 4, units = "in")
+
+sens_dat3 %>%
+  mutate(par = factor(par, levels = c("Caa", "Cab", "Cba", "Cbb", 
+                                      "Pxa", "Pxb", "Sax", "Sbx", 
+                                      "Maa", "Mab", "Mba", "Mbb"))) %>%
+  ggplot(aes(x = val, y = FIs, color = par, linetype = type)) + 
+  geom_line(size = 1.5) + ylim(1, 2) + 
+  theme_classic(base_size = 12) + ylab("Fitness Inequalities") + 
+  xlab("Parameter Value") + theme_classic(base_size = 15) + 
+  theme(axis.text.x = element_blank()) + 
+  scale_color_manual(name = "Parameter", 
+                     values = c("#844A9D", "#B990CB", 
+                                "#DDC7E5", "#462753",
+                                "#F5D544", "#D5B00B", 
+                                "#FF7F11", "#FFB370",
+                                "#3B747D","#58A4B0", 
+                                "#9ECAD1", "#214045"))
+
+ggsave(file.path("Figures", "VSA_legend.pdf"), 
+       width = 5, height = 4, units = "in")
